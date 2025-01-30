@@ -3,12 +3,14 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors';
 
 // Necessario per usare __dirname in moduli ES
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(cors());
 
 // 1) Diciamo ad Express di interpretare il body come testo se "Content-Type" è "application/xml"
 app.use(express.text({ type: 'application/xml' }));
