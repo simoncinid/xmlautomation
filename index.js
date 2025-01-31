@@ -43,6 +43,40 @@ app.post('/upload-xml', (req, res) => {
   }
 });
 
+// *** NUOVO: Endpoint per PDF Proxy ***
+app.get('/pdf-proxy', async (req, res) => {
+  const pdfUrl = req.query.url; // es: /pdf-proxy?url=https://www.example.com/file.pdf
+  if (!pdfUrl) {
+    return res.status(400).send('Manca parametro url');
+  }
+
+  try {
+    // Node 18+ supporta fetch nativamente
+    const fetchRes = await fetch(pdfUrl);
+    if (!fetchRes.ok) {
+      return res.status(500).send('Errore fetch PDF: ' + fetchRes.statusText);
+    }
+
+    // Leggi come ArrayBuffer
+    const pdfArrayBuffer = await fetchRes.arrayBuffer();
+
+    // Imposta header "Content-Type: application/pdf"
+    res.setHeader('Content-Type', 'application/pdf');
+
+    // Se vuoi forzare il download:
+    // res.setHeader('Content-Disposition', 'attachment; filename="myfile.pdf"');
+    // Altrimenti inline:
+    // res.setHeader('Content-Disposition', 'inline; filename="myfile.pdf"');
+
+    // Invia come buffer
+    res.send(Buffer.from(pdfArrayBuffer));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Errore interno proxy');
+  }
+});
+
+
 // Render e gli hosting PaaS usano process.env.PORT per la porta
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
